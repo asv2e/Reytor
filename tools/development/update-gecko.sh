@@ -21,9 +21,16 @@ if [[ -z "$RELEASE_TAG" ]]; then
 	exit 1
 fi
 
-if ! git submodule status -- "$SUBMODULE_PATH" >/dev/null 2>&1; then
-	echo "Missing submodule $SUBMODULE_PATH. Add it first, then run this script."
-	exit 1
+if ! git rev-parse --verify HEAD:"$SUBMODULE_PATH" >/dev/null 2>&1 && [[ ! -d "$SUBMODULE_PATH/.git" ]]; then
+	echo "Submodule path $SUBMODULE_PATH is not initialized. Cloning from $FIREFOX_URL."
+	rm -rf "$SUBMODULE_PATH"
+	git clone --depth 1 --filter=blob:none "$FIREFOX_URL" "$SUBMODULE_PATH"
+fi
+
+if ! git -C "$SUBMODULE_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+	echo "Submodule path $SUBMODULE_PATH is missing or not a git repo. Re-cloning from $FIREFOX_URL."
+	rm -rf "$SUBMODULE_PATH"
+	git clone --depth 1 --filter=blob:none "$FIREFOX_URL" "$SUBMODULE_PATH"
 fi
 
 if ! git ls-remote --exit-code --tags "$FIREFOX_URL" "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
@@ -33,10 +40,14 @@ fi
 
 TAG_REF="refs/tags/$RELEASE_TAG"
 
-echo "Updating existing submodule at $SUBMODULE_PATH"
-git submodule set-url -- "$SUBMODULE_PATH" "$FIREFOX_URL"
-git submodule sync -- "$SUBMODULE_PATH"
-git submodule update --init --depth 1 -- "$SUBMODULE_PATH"
+echo "Updating Gecko checkout at $SUBMODULE_PATH"
+if git rev-parse --verify HEAD:"$SUBMODULE_PATH" >/dev/null 2>&1; then
+	git submodule set-url -- "$SUBMODULE_PATH" "$FIREFOX_URL"
+	git submodule sync -- "$SUBMODULE_PATH"
+	git submodule update --init --depth 1 -- "$SUBMODULE_PATH"
+else
+	git -C "$SUBMODULE_PATH" remote set-url origin "$FIREFOX_URL"
+fi
 
 echo "Fetching and checking out tag $RELEASE_TAG..."
 git -C "$SUBMODULE_PATH" fetch --depth 1 origin tag "$RELEASE_TAG"
