@@ -1,0 +1,29 @@
+CURRENT_VERSION = 0.13.0
+CURRENT_BUILD = UNKNOWN
+APP_DISPLAY_NAME = Reytor
+
+IPHONEOS_DEPLOYMENT_TARGET = 13.0
+ARCHS = arm64
+VALID_ARCHS = arm64
+
+ENABLE_BITCODE = NO
+
+GECKO_DIST = $(SRCROOT)/../engine/firefox/obj-aarch64-apple-ios/dist
+
+HEADER_SEARCH_PATHS = $(inherited) $(GECKO_DIST)/include $(GECKO_DIST)/include/GeckoView $(SRCROOT)/GeckoView
+LIBRARY_SEARCH_PATHS = $(inherited) $(GECKO_DIST)/bin
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(BUILT_PRODUCTS_DIR)
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks @loader_path/Frameworks
+SWIFT_OBJC_BRIDGING_HEADER = $(SRCROOT)/Reynard/Bridging/Reynard-Bridging-Header.h
+
+// IPtProxy is built with Go; its cgo-based DNS resolver calls into libresolv's
+// BIND9 symbols (res_9_ninit/res_9_nclose/res_9_nsearch) on Apple platforms.
+// Link libresolv explicitly so the linker can find them.
+OTHER_LDFLAGS = $(inherited) -lresolv
+
+// Xcode 26 defaults Swift targets to "explicit module builds", whose bridging-header
+// dependency scanner fails to resolve headers exported from the Gecko object dir
+// (e.g. GeckoView/GeckoViewSwiftSupport.h) even though they exist on disk at the
+// configured HEADER_SEARCH_PATHS. Falling back to the classic bridging-header PCH
+// path avoids the false "file not found" failure. See rdar://116006619-style reports.
+SWIFT_ENABLE_EXPLICIT_MODULES = NO

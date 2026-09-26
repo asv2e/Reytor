@@ -1,0 +1,3 @@
+[submodule "engine/firefox"]
+	path = engine/firefox
+	url = https://github.com/mozilla-firefox/firefox

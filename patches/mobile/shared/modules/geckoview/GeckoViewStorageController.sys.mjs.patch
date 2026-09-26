@@ -1,0 +1,125 @@
+diff --git a/mobile/shared/modules/geckoview/GeckoViewStorageController.sys.mjs b/mobile/shared/modules/geckoview/GeckoViewStorageController.sys.mjs
+index 1111111111111111111111111111111111111111..2222222222222222222222222222222222222222 100644
+--- a/mobile/shared/modules/geckoview/GeckoViewStorageController.sys.mjs
++++ b/mobile/shared/modules/geckoview/GeckoViewStorageController.sys.mjs
+@@ -98,7 +98,7 @@
+ 
+     switch (aEvent) {
+       case "GeckoView:ClearData": {
+-        this.clearData(aData.flags, aCallback);
++        this.clearData(aData.flags, aCallback, aData.from, aData.to);
+         break;
+       }
+       case "GeckoView:ClearSessionContextData": {
+@@ -198,11 +198,80 @@
+         );
+         break;
+       }
++
++      case "GeckoView:RemovePermission": {
++        const principal = lazy.E10SUtils.deserializePrincipal(aData.principal);
++        let key = aData.perm;
++        if (key == "storage-access") {
++          key = "3rdPartyFrameStorage^" + aData.thirdPartyOrigin;
++        }
++        Services.perms.removeFromPrincipal(principal, key);
++        break;
++      }
++
++      case "GeckoView:RemovePermissionByURI": {
++        const uri = Services.io.newURI(aData.uri);
++        const principal = Services.scriptSecurityManager.createContentPrincipal(
++          uri,
++          {
++            geckoViewSessionContextId: aData.contextId ?? undefined,
++            privateBrowsingId: aData.privateId,
++          }
++        );
++        Services.perms.removeFromPrincipal(principal, aData.perm);
++        break;
++      }
++
+     }
+   },
+ 
+-  async clearData(aFlags, aCallback) {
++  async listStorageHosts(aCallback) {
++    const hosts = new Set();
++
++    try {
++      for (const cookie of Services.cookies.cookies) {
++        if (cookie.rawHost) {
++          hosts.add(cookie.rawHost);
++        }
++      }
++    } catch (ex) {
++      debug`Failed to enumerate cookies for ListStorageHosts ${ex}`;
++    }
++
++    try {
++      const origins = await new Promise(resolve => {
++        Services.qms.listOrigins().callback = request => {
++          if (request.resultCode != Cr.NS_OK) {
++            resolve([]);
++            return;
++          }
++          resolve(request.result);
++        };
++      });
++
++      for (const origin of origins) {
++        try {
++          const principal =
++            Services.scriptSecurityManager.createContentPrincipalFromOrigin(
++              origin
++            );
++          if (principal?.asciiHost) {
++            hosts.add(principal.asciiHost);
++          }
++        } catch (ex) {
++          // Ignore non-content origins.
++        }
++      }
++    } catch (ex) {
++      debug`Failed to enumerate quota origins for ListStorageHosts ${ex}`;
++    }
++
++    aCallback.onSuccess({ hosts: Array.from(hosts) });
++  },
++
++  async clearData(aFlags, aCallback, aFrom, aTo) {
+     const flags = convertFlags(aFlags);
++    const from = Number.isFinite(aFrom) ? aFrom : 0;
+ 
+     // storageAccessAPI permissions record every site that the user
+     // interacted with and thus mirror history quite closely. It makes
+@@ -216,16 +285,28 @@
+       await new Promise(resolve => {
+         Services.clearData.deleteUserInteractionForClearingHistory(
+           principals,
+-          0,
++          from,
+           resolve
+         );
+       });
+     }
+ 
+     new Promise(resolve => {
++      if (Number.isFinite(aFrom) && Number.isFinite(aTo)) {
++        Services.clearData.deleteDataInTimeRange(
++          aFrom,
++          aTo,
++          /* isUserRequest */ true,
++          flags,
++          resolve
++        );
++        return;
++      }
+       Services.clearData.deleteData(flags, resolve);
+     }).then(() => {
+       aCallback.onSuccess();
++    }, error => {
++      aCallback.onError(error);
+     });
+   },
+ 

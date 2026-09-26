@@ -1,0 +1,94 @@
+workflows:
+  ios-release:
+    name: Reynard iOS release
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    cache_paths:
+      - $HOME/.cargo
+      - $HOME/Library/Caches/sccache
+      - support/arti-ffi/target
+      - support/idevice/target
+      - engine/firefox/obj-aarch64-apple-ios
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: browser/Reynard.xcodeproj
+        XCODE_SCHEME: Reynard
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+    scripts:
+      - name: Install native build dependencies
+        script: |
+          set -euo pipefail
+          brew install cmake nasm yasm pkg-config sccache
+
+      - name: Install Rust target
+        script: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          fi
+          source "$HOME/.cargo/env"
+          rustup target add aarch64-apple-ios
+
+      - name: Fetch Gecko and iDevice sources
+        script: |
+          set -euo pipefail
+          firefox_tag="$(tr -d '\000\r' < engine/release.txt | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+          git submodule update --init --depth 1 engine/firefox
+          git -C engine/firefox fetch --depth 1 origin tag "$firefox_tag"
+          git -C engine/firefox checkout --detach "$firefox_tag^{commit}"
+          git clone --depth 1 \
+            https://github.com/jkcoxson/idevice support/idevice
+
+      - name: Apply Gecko patches
+        script: |
+          set -euo pipefail
+          root_dir="$(pwd)"
+          find "$root_dir/patches" -type f -name '*.patch' -print | sort | while IFS= read -r patch_file; do
+            git -C engine/firefox apply --3way --whitespace=nowarn "$patch_file"
+          done
+
+      - name: Build Rust dependencies
+        script: |
+          ./tools/development/build-idevice.sh
+          ./tools/development/build-arti.sh
+
+      - name: Build Gecko
+        script: |
+          export SCCACHE_DIR="$HOME/Library/Caches/sccache"
+          ./tools/development/build-gecko.sh --use-sccache
+
+      - name: Build unsigned IPA
+        script: |
+          set -euo pipefail
+          mkdir -p build/ios/ipa
+          cp browser/Configuration/Reynard.xcconfig build/Reynard.xcconfig
+          build_sha="$(git rev-parse --short=7 HEAD)"
+          sed -i '' -E "s|^CURRENT_BUILD = .*|CURRENT_BUILD = $build_sha|" build/Reynard.xcconfig
+
+          xcodebuild -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            -xcconfig build/Reynard.xcconfig \
+            build
+
+          APP_PATH="$(find build/DerivedData -path '*Build/Products/Release-iphoneos/*.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "Unsigned app bundle was not produced at Release-iphoneos" >&2
+            exit 1
+          fi
+
+          mkdir -p build/ios/app
+          cp -R "$APP_PATH" "build/ios/app/Reynard-unsigned.app"
+          ditto -ck --sequesterRsrc --keepParent "$APP_PATH" "build/ios/ipa/Reynard-unsigned.ipa"
+
+    artifacts:
+      - build/ios/app/*.app
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive
+      - /tmp/xcodebuild_logs/*.log

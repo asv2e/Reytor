@@ -1,0 +1,72 @@
+[package]
+name = "arti-ffi"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MIT OR Apache-2.0"
+description = "Thin C ABI wrapper around arti-client, embedding a Tor client and a local SOCKS5 forwarder for use from Reynard's Swift/Obj-C networking code."
+
+# Arti's own crates explicitly document that they don't yet offer a stable
+# FFI surface ("We don't yet offer an API that would be nice to expose via
+# FFI; we intend to add this in the future" - arti_client docs). This crate
+# is therefore *our* stable boundary: it pins a specific arti-client release
+# and exposes only the small slice of functionality Reynard needs, so that
+# an upstream API change only requires updating this crate instead of every
+# call site in Swift.
+#
+# The calls this crate makes (TorClient::with_runtime/create_unbootstrapped,
+# bootstrap_events/as_frac/ready_for_traffic, bootstrap(), isolated_client(),
+# connect_with_prefs()/StreamPrefs/IsolationToken,
+# TorClientConfigBuilder::storage().state_dir()/cache_dir() with CfgPath,
+# bridges().bridges()/.enabled() with BridgeConfigBuilder parsed from bridge
+# lines) were checked against arti-client's published docs and a working
+# third-party caller (the `onionize` crate) rather than assumed from memory.
+# They have NOT been compiled end-to-end against this exact pin - do that
+# before shipping (see tools/development/build-arti.sh).
+#
+# Pluggable-transport bridges (obfs4/snowflake) ARE now supported, via the
+# `pt-client` feature's "unmanaged transport" mode
+# (TransportConfigBuilder::proxy_addr): arti connects to an already-running
+# local proxy instead of spawning a binary itself, matching arti's own
+# docs ("pluggable transports need to be installed separately... Arti does
+# not provide them on its own"). That local proxy is IPtProxy (Guardian
+# Project's Lyrebird/Snowflake port, run in-process via gomobile bindings -
+# see PluggableTransportController.swift), started from the Swift side
+# before arti_start is called and passed in as a port. This is the same
+# wall + the same real-world solution a maintainer of another Rust project
+# hit and found when embedding arti-client on iOS/mobile (see
+# gitlab.torproject.org/tpo/core/arti/-/issues/1815).
+#
+# meek and webtunnel bridges are still NOT supported - IPtProxy doesn't
+# currently provide those transports, only Lyrebird/obfs4 and Snowflake.
+# Bridge lines requesting them parse fine (now that pt-client is on) but
+# get skipped in build_config for lack of a usable proxy port, same as any
+# other line this build can't service.
+#
+# The exact API surface for the pluggable-transport pieces specifically
+# (TransportConfigBuilder::protocols()/build(), the .transports() accessor
+# on BridgesConfigBuilder, PtTransportName's exact import path) is less
+# firmly confirmed than the rest of this file - grounded in docs.rs pages
+# for TransportConfigBuilder/TransportConfig and tor-ptmgr's published
+# source, but not cross-checked against this exact pin the way the older
+# calls in this file were. Verify against the pinned version's actual docs
+# before shipping.
+[lib]
+name = "arti_ffi"
+crate-type = ["staticlib"]
+
+[dependencies]
+# Bump deliberately and re-check this crate against the arti-client
+# CHANGELOG when doing so, since upstream marks these APIs unstable and
+# reserves the right to break them between releases. Bumped from 0.30.0 to
+# 0.39.0 (the current release as of this update) specifically to pick up
+# pluggable-transport support with more confidence than an older pin.
+arti-client = { version = "=0.39.0", default-features = false, features = ["tokio", "rustls", "bridge-client", "pt-client"] }
+tor-rtcompat = { version = "=0.39.0", features = ["tokio", "rustls"] }
+tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "net", "io-util", "sync", "time", "macros"] }
+futures = "0.3"
+libc = "0.2"
+
+[profile.release]
+panic = "abort"
+lto = true

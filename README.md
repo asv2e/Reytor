@@ -1,1 +1,221 @@
-# reytor
+<img width="100" height="100" src="https://raw.githubusercontent.com/asv2e/Reytor/refs/heads/main/Reytor.jpeg"/>
+
+# Reytor Browser
+
+Reytor is a **Gecko-based** web browser for iOS 13+.
+
+Unlike other browsers on iOS that are forced to use Apple's **WebKit** engine (including Safari and all third-party browsers), Reytor uses **Gecko**. This is the same engine that powers the Firefox browser on desktop and Android devices.
+
+Besides providing an **alternative, up-to-date browser engine**[^1], Reytor supports Firefox add-ons, Tor features including the Tor network, more capable ad-blocking extensions, along with privacy features such as Enhanced Tracking Protection and DNS over HTTPS.
+
+[^1]: This is particularly useful on older iOS versions. Because WebKit is bundled with the OS, devices that no longer receive iOS updates are also stuck with an older browser engine, which can cause modern websites to break or render incorrectly.
+
+## Installation
+
+The latest builds are available for download on the [Releases](https://github.com/asv2e/Reytor/releases/) page. Please note that this project is still in an early experimental state, so expect bugs and missing features.
+
+For common questions and troubleshooting, see the [FAQ](https://github.com/asv2e/Reytor/issues).
+
+Reytor is available as a standard build, a TrollStore build[^2], and a jailbroken build[^3], depending on your iOS version and installation method:
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>iOS version</th>
+      <th>Build</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://altstore.io/">AltStore</a> or <a href="https://sidestore.io/">SideStore</a></td>
+      <td>iOS 17.4+</td>
+      <td><a href="https://github.com/asv2e/Reytor/releases/latest/download/Reytor.ipa"><code>Reytor.ipa</code></a></td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/opa334/TrollStore">TrollStore</a></td>
+      <td>iOS 14 - 16.6.1, 17.0</td>
+      <td><a href="https://github.com/asv2e/Reytor/releases/latest/download/Reytor-TrollStore.tipa"><code>Reytor-TrollStore.tipa</code></a></td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/opa334/TrollStore">TrollStore</a></td>
+      <td>Jailbroken iOS 14</td>
+      <td><a href="https://github.com/asv2e/Reytor/releases/latest/download/Reytor-Jailbroken.ipa"><code>Reytor-Jailbroken.ipa</code></a></td>
+    </tr>
+    <tr>
+      <td><a href="https://havoc.app/package/trollstorelite">TrollStore Lite</a></td>
+      <td>Jailbroken iOS 16.7 - 16.7.16, 17.0.1+</td>
+      <td><a href="https://github.com/asv2e/Reytor/releases/latest/download/Reytor-TrollStore.tipa"><code>Reytor-TrollStore.tipa</code></a></td>
+    </tr>
+    <tr>
+      <td><a href="https://www.tigisoftware.com/default/?page_id=78">Filza File Manager</a> + <a href="https://github.com/akemin-dayo/AppSync">AppSync Unified</a></td>
+      <td>Jailbroken iOS 13</td>
+      <td><a href="https://github.com/asv2e/Reytor/releases/latest/download/Reytor-Jailbroken.ipa"><code>Reytor-Jailbroken.ipa</code></a></td>
+    </tr>
+  </tbody>
+</table>
+
+[^2]: The TrollStore build provides automatic JIT enablement, better performance, and automatic app updates. For automatic app updates, make sure **URL Scheme Enabled** is turned on in TrollStore.
+[^3]: The jailbroken build provides automatic JIT enablement and better performance.
+
+> [!NOTE]
+> Although jailbroken builds are available, using Reytor in a jailbroken environment is not recommended. Tweaks and other system modifications may affect the browser's performance, stability, or functionality, and issues resulting from them may receive limited support.
+
+**For AltStore or SideStore installations:**
+
+Make sure to select **Keep App Extensions** during installation, as Reytor will not work without them.
+
+You can also [click here](https://altdirect.app/?url=https://github.com/asv2e/Reytor/releases/latest/download/source.json&exclude=livecontainer,stikstore,trollapps,feather) to add the AltSource for Reytor to AltStore or SideStore.
+
+> [!IMPORTANT]
+> - **LiveContainer is not supported** due to not supporting app extensions
+> - Sideloading using a distribution certificate for signing are **not supported**.⁠
+> - Other sideloading methods may be **incompatible with Reytor**, and **no support will be provided** for issues arising from them.
+
+> [!IMPORTANT]
+> - **LiveContainer is not supported** due to not supporting app extensions
+> - Sideloading using a distribution certificate for signing are **not supported**.⁠
+> - Other sideloading methods may be **incompatible with Reytor**, and **no support will be provided** for issues arising from them.
+
+## Preview
+
+### iOS 14 (iPhone 6S Plus, 14.1)
+
+These sites are known to break or render incorrectly on iOS 14. The screenshots below compare how they load in Safari versus Reytor.
+
+<table>
+  <tr>
+    <th colspan="2">github.com</th>
+    <th colspan="2">chatgpt.com</th>
+    <th colspan="2">apple.com</th>
+  </tr>
+  <tr>
+    <td align="center">Safari</td>
+    <td align="center">Reytor</td>
+    <td align="center">Safari</td>
+    <td align="center">Reytor</td>
+    <td align="center">Safari</td>
+    <td align="center">Reytor</td>
+  </tr>
+  <tr>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/d89f4385-c478-4aea-aa9d-6c9fca72252b"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/279f8268-b196-415d-9199-66c06989ae7f"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/1a68024e-83d4-489c-a576-26d5ea43011c"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/eb8f0073-04c2-436d-b66c-9ba2af8e56c2"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/0e52fbf1-af5d-4a83-9bba-50c5d1e15d57"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/edbd8e50-a02d-4107-a5e2-f8ab2c6382bb"><br>
+    </td>
+  </tr>
+</table>
+
+### iOS 15 (iPhone 7, 15.8.6)
+
+<table>
+  <tr>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/e716f563-8ab5-4d3c-b49a-4bb66fc78d59"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/33ece0a3-c876-40c5-acdc-26ea3ac9b9b6"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/96ed97e3-aa57-4b80-adee-108699fef90d"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/e9018214-53ef-41b2-a92c-ed03e7d2a366"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/abe83082-1fc6-4ee9-999e-f81e1712ac13"><br>
+    </td>
+  </tr>
+</table>
+
+### iOS 26 (iPhone 13 mini, 26.1)
+
+Reytor also works great on the latest version of iOS!
+
+<table>
+  <tr>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/62568ad7-c84c-4623-a560-f679c2a47755"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/4c43cda8-5451-4876-9556-2529a36e0e62"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/d213427d-c207-4129-82b4-a19b091072e0"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/f0e7b590-63be-44cf-87c2-c790c59bd915"><br>
+    </td>
+    <td>
+      <img width=150 src="https://github.com/user-attachments/assets/6015bbc0-727c-4fca-9756-3ec3d256f162"><br>
+    </td>
+  </tr>
+</table>
+
+<<<<<<< HEAD
+## Development
+
+If you’ve come across this repository and find it interesting, I’d love to get help or collaborate on it. I’m learning as I go here and don’t have much prior experience with iOS app development or with Gecko itself, so any contributions, feedback, or pointers would be greatly appreciated.
+
+=======
+## Building
+
+> [!WARNING]
+> Build instructions are included below for reference. Please be aware that I **do not** provide support for issues or errors encountered during the build process.
+
+To build the project, you'll need Xcode, [Python 3](https://www.python.org/downloads/), and [Rust & Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+
+Clone the repository.
+
+```bash
+git clone --recursive https://github.com/asv2e/Reytor
+cd Reytor
+```
+
+Download Gecko and apply patches.
+
+```bash
+./tools/development/update-gecko.sh
+./tools/development/apply-patches.sh
+```
+
+Build dependencies and the Gecko engine.
+
+```bash
+./tools/development/build-idevice.sh
+./tools/development/build-gecko.sh
+```
+
+To run Reytor, open `Reynard.xcodeproj` in Xcode and build/run it from there.
+
+## Development
+
+This project initially started out of curiosity. I wanted to see if I could get Gecko to run without the [BrowserEngineKit](https://developer.apple.com/documentation/browserenginekit) framework, so it could be further modified to support iOS versions as far back as possible. I got it working, and since then, I’ve been focusing on developing engine patches for better integration with iOS, fixing bugs, and turning Reytor into a full, usable browser.
+
+If you’ve come across this repository and find it interesting, I’d love to get help or collaborate on it. I’m learning as I go here and don’t have much prior experience with iOS app development or with Gecko itself, so any contributions, feedback, or pointers would be greatly appreciated.
+
+## Acknowledgements
+- [reynard-browser](https://github.com/minh-ton/reynard-browser) : this repo is a fork of Reynard browser
+- [LiveContainer](https://github.com/LiveContainer/LiveContainer): app extension handling and NSExtension usage.
+- [StikDebug](https://github.com/StephenDev0/StikDebug) and [idevice](https://github.com/jkcoxson/idevice): pairing-based JIT enablement support.
+- [TrollStore](https://github.com/opa334/TrollStore): spawning a binary as root and JIT enablement.
+- [Amethyst-iOS](https://github.com/AngelAuraMC/Amethyst-iOS), [dolphin-ios](https://github.com/OatmealDome/dolphin-ios), [DukeX](https://github.com/MaftyManicEMU/DukeX), and [MeloNX](https://git.ryujinx.app/projects/MeloNX): Various utility functions, numerous private API usage, and JIT memory handling.
+- [WebKit](https://github.com/webkit/webkit): Private API references for deeper iOS integration, such as sandboxing, hardware keyboard support, and lifecycle events.
+- [Pre-existing work](https://bugzilla.mozilla.org/show_bug.cgi?id=1882872) on bringing Gecko to iOS using BrowserEngineKit: most of the difficult engine integration. 
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](https://github.com/asv2e/Reytor/blob/main/LICENSE), except for the `patches`and `support/arti-ffi` directories containing the modifications to the Firefox Gecko engine and therefore is licensed under the [Mozilla Public License 2.0](https://github.com/asv2e/Reytor/blob/main/LICENSE.firefox).

@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+
+# Xcode / iOS build artifacts
+build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Release output
+/dist/
+*.ipa
+*.tipa
+*.app
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Local environment
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Node / package manager
+node_modules/
+
+# GitHub Actions runtime
+.github/actions/
